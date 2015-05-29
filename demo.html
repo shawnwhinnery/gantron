@@ -1,0 +1,123 @@
+<html>
+	<head>
+		<script type="text/javascript" src='demo/grid.js'></script>
+		<script type="text/javascript" src='lib/gantron.js'></script>
+		<link rel="stylesheet" href='lib/gantron.css'></script>
+		<style>
+		html{font-size: 4px;}
+		body{font-family: Arial, Helvetica, Sans; font-size: 3rem;margin:3rem;}
+		#out, #serial{height: 350px; overflow: scroll; font-size:8px; letter-spacing: 1px; background: rgba(0,0,0,.1); padding: 3rem;}
+		.plop{min-height: 10rem;}
+		p{font-size: 3rem}
+		ul{
+			margin : 0px;
+			padding: 0px;
+			padding-left: 5rem;
+		}
+		li{
+
+		}
+		</style>
+	</head>
+	<body>
+		<h1 class='marg-s'>Gantron</h1>
+		<div class="row">
+			<div class="col-1-1">
+				<h2>Live Example</h2>
+				<div id="tainer"></div>
+			</div>
+		</div>
+		<h2>Output</h2>
+		<div class='row marg-n'>
+			<div class='col-1-2'>
+				<h3>tron.value()</h3>
+				<p class='plop'>
+					Below is the output of the value() method. This assembles a JSON object representing the values of the block that occupies it's place on the chart. Hidden inputs will not be present in the output, however, their values persist and are included in the serialization proccess.
+				</p>
+				<pre id="out"></pre>
+			</div>
+			<div class='col-1-2'>
+				<h3>tron.serialize()</h3>
+				<p class='plop'>
+					Below is the output of the serialize() method. If you pass the results of serialize() to Gantron using the deSerialize() method you can restore the chart to it's previous state.
+				</p>
+				<pre id="serial"></pre>
+			</div>
+		</div>
+
+		<script type="text/javascript">
+			
+			var behaviors = [
+				"Demand Shaving",
+				"Charge To",
+				"Discharge To",
+				"Idle",
+			]
+
+			var bahaviorColors = [
+				"#2980b9",
+				"#2ecc71",
+				"#e74c3c",
+				"#7f8c8d",
+			]
+
+			var behaviorLabels = [
+				function(){
+						return behaviors[0]+" ( "+this.inputs[0].inputs[0].value+" kW )"
+				},
+				function(){
+					return "Charge to "+this.inputs[0].inputs[1].value+"%"
+				},
+				function(){
+					return "Discharge to "+this.inputs[0].inputs[2].value+"%"
+				},
+				function(){
+					return behaviors[3]
+				},
+			]
+
+			var tron = new Gantron({
+				container : document.getElementById("tainer"),
+				onchange : function(){
+					this.color = bahaviorColors[this.inputs[0].selected]
+					this.label = behaviorLabels[this.inputs[0].selected].bind(this)()
+	            },
+				inputs : [
+					{
+	                    type: "select",
+						label : "Behavior",
+						name : "behavior",
+	                    options: behaviors,
+	                    selected : 0,
+	                    inputs : [
+		                    {
+			                    type: "text",
+								label : "Baseline",
+								name : "baseline",
+			                    value : 0
+		                    },
+		                    {
+		                    	label : "State of Charge",
+		                    	name : "soc",
+		                    	value : 5,
+		                    	type : "range"
+		                    },
+		                    {
+		                    	label : "State of Charge",
+		                    	name : "soc",
+		                    	value : 5,
+		                    	type : "range"
+		                    }
+	                    ]
+                	}
+				]
+			});
+
+			window.setInterval(function(argument) {
+				document.getElementById("out").innerHTML = JSON.stringify(tron.value(), null, 4)
+				document.getElementById("serial").innerHTML = JSON.stringify(tron.serialize(), null, 4)
+			}, 250)
+
+		</script>
+	</body>
+</html>
